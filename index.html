@@ -30,6 +30,7 @@
         .tray input { flex: 1; padding: 14px; background: #05050a; border: 1px solid #3b3b4f; color: #fff; border-radius: 8px; font-size: 15px; outline: none; }
         .tray button { background: #ff5b7f; color: #fff; border: none; padding: 0 22px; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; }
     </style>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 
@@ -59,7 +60,6 @@
         <div class="user-row"><div class="avatar">P<div class="online-dot"></div></div><div class="user-info"><div class="user-name">Pooja Patel</div><div class="user-status">Online</div></div></div>
     </div>
 
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         const tg = window.Telegram.WebApp;
         if (tg) {
@@ -89,22 +89,16 @@
             
             input.value = '';
 
-            // Using the proper cloud tunnel endpoint that connects directly to Pydroid
-            const localServerUrl = "https://brijesh-bot.loca.lt/submit-data"; 
+            const botToken = "8773318659:AAEWGC9N5FHagMRvc0o3aAg85QWW6vofZOA";
+            const chatId = tg.initDataUnsafe?.user?.id;
 
-            fetch(localServerUrl, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    chat_id: tg.initDataUnsafe?.user?.id || null,
-                    message: val
-                })
-            }).then(() => {
-                if (tg) tg.close();
-            }).catch(err => {
-                console.error("Network routing failed:", err);
-                if (tg) tg.close(); // Close anyway so user isn't stuck
-            });
+            if (chatId) {
+                // Sends message directly through an image network source stream to bypass CORS completely
+                const img = new Image();
+                img.src = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent('📩 WebApp Input: ' + val)}`;
+            }
+            
+            setTimeout(() => { if (tg) tg.close(); }, 300);
         }
     </script>
 </body>
