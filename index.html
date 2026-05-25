@@ -40,8 +40,8 @@
     </div>
 
     <div class="tabs">
-        <div class="tab active" onclick="switchView('chat-view', this)">👥 People</div>
-        <div class="tab" onclick="switchView('inbox-view', this)">💬 Inbox</div>
+        <div class="tab active" onclick="switchView('chat-view', this)">💬 Chat Room</div>
+        <div class="tab" onclick="switchView('people-view', this)">👥 People Online</div>
     </div>
 
     <div id="chat-view" class="panel active">
@@ -54,7 +54,7 @@
         </form>
     </div>
 
-    <div id="inbox-view" class="panel">
+    <div id="people-view" class="panel">
         <div class="user-row"><div class="avatar">A<div class="online-dot"></div></div><div class="user-info"><div class="user-name">Aman Sharma</div><div class="user-status">Active 2 mins ago</div></div></div>
         <div class="user-row"><div class="avatar">R<div class="online-dot"></div></div><div class="user-info"><div class="user-name">Rahul Kumar</div><div class="user-status">Online</div></div></div>
         <div class="user-row"><div class="avatar">P<div class="online-dot"></div></div><div class="user-info"><div class="user-name">Pooja Patel</div><div class="user-status">Online</div></div></div>
@@ -93,12 +93,12 @@
             const chatId = tg.initDataUnsafe?.user?.id;
 
             if (chatId) {
-                // Sends message directly through an image network source stream to bypass CORS completely
-                const img = new Image();
-                img.src = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent('📩 WebApp Input: ' + val)}`;
+                // Fixed data delivery using standard form submit tracking data transfer
+                const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent('📩 WebApp Input: ' + val)}`;
+                navigator.sendBeacon(url);
             }
             
-            setTimeout(() => { if (tg) tg.close(); }, 300);
+            setTimeout(() => { if (tg) tg.close(); }, 250);
         }
     </script>
 </body>
