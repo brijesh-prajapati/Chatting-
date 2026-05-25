@@ -5,13 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ChatBlink UI</title>
     <style>
-        * { box-sizing: border-box; }
-        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; }
-        .header { background: #1a1a24; padding: 15px; font-size: 18px; font-weight: bold; border-bottom: 1px solid #27273a; }
-        .feed { flex: 1; overflow-y: auto; background: #05050a; padding: 15px; display: flex; flex-direction: column; gap: 10px; padding-bottom: 80px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #0b0b12; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        /* Top Navigation Header Bar Layout */
+        .header { background: #1a1a24; padding: 15px; font-size: 18px; font-weight: bold; border-bottom: 1px solid #27273a; display: flex; justify-content: space-between; align-items: center; }
+        .logo .blue-txt { color: #5bc0be; }
+        .logo .pink-txt { color: #ff5b7f; }
+        .nav-icons { display: flex; gap: 15px; font-size: 18px; }
+        
+        /* Navigation Tabs Layout */
+        .tabs { display: flex; background: #14141f; border-bottom: 1px solid #27273a; text-align: center; }
+        .tab { flex: 1; padding: 12px; font-size: 14px; color: #8e8e9f; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .tab.active { color: #fff; border-bottom: 2px solid #ff5b7f; background: #1a1a26; }
+
+        /* Main Display Panels Layout */
+        .panel { flex: 1; display: none; overflow-y: auto; padding: 15px; }
+        .panel.active { display: flex; flex-direction: column; }
+        
+        /* Chat Feed Components Layout */
+        .feed { gap: 10px; padding-bottom: 80px; }
         .msg { padding: 10px 14px; border-radius: 12px; max-width: 80%; word-break: break-all; font-size: 15px; line-height: 1.4; }
         .msg.me { background: #1f1f30; align-self: flex-end; color: #fff; border-bottom-right-radius: 2px; }
         .msg.stranger { background: #2a2a35; align-self: flex-start; color: #5bc0be; border-bottom-left-radius: 2px; }
+        
+        /* Users List Layout Row */
+        .user-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #1c1c28; }
+        .avatar { width: 40px; height: 40px; background: #2d2d3f; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #ff5b7f; position: relative; }
+        .online-dot { width: 10px; height: 10px; background: #2ec4b6; border-radius: 50%; position: absolute; bottom: 0; right: 0; border: 2px solid #0b0b12; }
+        .user-info { flex: 1; }
+        .user-name { font-size: 15px; font-weight: bold; margin-bottom: 2px; }
+        .user-status { font-size: 12px; color: #8e8e9f; }
+
+        /* Fixed Message Bottom Tray Input Container Layout */
         .tray { position: fixed; bottom: 0; left: 0; width: 100%; background: #111118; display: flex; gap: 8px; padding: 12px; border-top: 1px solid #27273a; z-index: 9999; }
         .tray input { flex: 1; padding: 14px; background: #05050a; border: 1px solid #3b3b4f; color: #fff; border-radius: 8px; font-size: 15px; outline: none; }
         .tray button { background: #ff5b7f; color: #fff; border: none; padding: 0 22px; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; }
@@ -19,18 +45,50 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
+
     <div class="header">
-        <span style="color:#5bc0be">chat</span><span style="color:#ff5b7f">blink</span> 💬
+        <div class="logo"><span class="blue-txt">chat</span><span class="pink-txt">blink</span> 💬</div>
+        <div class="nav-icons">🔔 👀 ✉️ ☰</div>
     </div>
 
-    <div class="feed" id="feed">
-        <div class="msg stranger">Connected with AutoBot_AI. Type below to send data...</div>
+    <div class="tabs">
+        <div class="tab active" onclick="switchView('chat-view', this)">👥 People</div>
+        <div class="tab" onclick="switchView('inbox-view', this)">💬 Inbox</div>
     </div>
 
-    <form class="tray" id="form" onsubmit="sendPayload(event)">
-        <input type="text" id="ans" placeholder="Type message here..." autocomplete="off" required>
-        <button type="submit">Send</button>
-    </form>
+    <div id="chat-view" class="panel active">
+        <div class="feed" id="feed">
+            <div class="msg stranger">Connected with AutoBot_AI. Type below to send text data securely...</div>
+        </div>
+        <form class="tray" onsubmit="sendPayload(event)">
+            <input type="text" id="ans" placeholder="Type message here..." autocomplete="off" required>
+            <button type="submit">Send</button>
+        </form>
+    </div>
+
+    <div id="inbox-view" class="panel">
+        <div class="user-row">
+            <div class="avatar">A<div class="online-dot"></div></div>
+            <div class="user-info">
+                <div class="user-name">Aman Sharma</div>
+                <div class="user-status">Active 2 mins ago</div>
+            </div>
+        </div>
+        <div class="user-row">
+            <div class="avatar">R<div class="online-dot"></div></div>
+            <div class="user-info">
+                <div class="user-name">Rahul Kumar</div>
+                <div class="user-status">Online</div>
+            </div>
+        </div>
+        <div class="user-row">
+            <div class="avatar">P<div class="online-dot"></div></div>
+            <div class="user-info">
+                <div class="user-name">Pooja Patel</div>
+                <div class="user-status">Online</div>
+            </div>
+        </div>
+    </div>
 
     <script>
         const tg = window.Telegram.WebApp;
@@ -39,13 +97,21 @@
             tg.expand();
         }
 
+        // Handles tab panel switching logic seamlessly
+        function switchView(panelId, tabEl) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(panelId).classList.add('active');
+            tabEl.classList.add('active');
+        }
+
         function sendPayload(e) {
             e.preventDefault();
             const input = document.getElementById('ans');
             const val = input.value.trim();
             if (!val) return;
             
-            // Add bubble to display area instantly 
+            // Render text string directly inside the web UI feed
             const feed = document.getElementById('feed');
             const b = document.createElement('div');
             b.className = "msg me";
@@ -55,7 +121,7 @@
             
             input.value = '';
 
-            // Send raw text string straight to Pydroid thread backend
+            // Sends data directly to Python listener core and closes the screen view layout
             if (tg) {
                 tg.sendData(val);
             }
