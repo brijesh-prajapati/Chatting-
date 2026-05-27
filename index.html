@@ -30,7 +30,6 @@
         .tray input { flex: 1; padding: 14px; background: #05050a; border: 1px solid #3b3b4f; color: #fff; border-radius: 8px; font-size: 15px; outline: none; }
         .tray button { background: #ff5b7f; color: #fff; border: none; padding: 0 22px; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; }
     </style>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 
@@ -60,6 +59,7 @@
         <div class="user-row"><div class="avatar">P<div class="online-dot"></div></div><div class="user-info"><div class="user-name">Pooja Patel</div><div class="user-status">Online</div></div></div>
     </div>
 
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         const tg = window.Telegram.WebApp;
         if (tg) {
@@ -80,22 +80,21 @@
             const val = input.value.trim();
             if (!val) return;
             
-            // Instantly copies output to phone clipboard to bypass network blocks completely
-            const tempTextArea = document.createElement("textarea");
-            tempTextArea.value = val;
-            document.body.appendChild(tempTextArea);
-            tempTextArea.select();
-            document.execCommand("copy");
-            document.body.removeChild(tempTextArea);
+            const feed = document.getElementById('feed');
+            const b = document.createElement('div');
+            b.className = "msg me";
+            b.textContent = val;
+            feed.appendChild(b);
+            feed.scrollTop = feed.scrollHeight;
+            
+            input.value = '';
 
+            // This will execute perfectly because the application is now launched via persistent menu keyboard container layout
             if (tg) {
-                tg.showAlert("Message copied to clipboard! Paste it into the chat bar below.", () => {
-                    tg.close();
-                });
-            } else {
-                alert("Message copied!");
+                tg.sendData(val);
             }
         }
     </script>
 </body>
-</html>
+                                          </html>
+            
