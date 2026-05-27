@@ -45,11 +45,11 @@
 
     <div id="chat-view" class="panel active">
         <div class="feed" id="feed">
-            <div class="msg stranger">Connected to Realtime Server. Type safe message below...</div>
+            <div class="msg stranger">Welcome to ChatBlink clone room. Live layout connection active!</div>
         </div>
         <div class="tray">
             <input type="text" id="ans" placeholder="Type message here..." autocomplete="off">
-            <button type="button" onclick="sendViaNetwork()">Send</button>
+            <button type="button" onclick="sendMessage()">Send</button>
         </div>
     </div>
 
@@ -59,19 +59,12 @@
         <div class="user-row"><div class="avatar">P<div class="online-dot"></div></div><div class="user-info"><div class="user-name">Pooja Patel</div><div class="user-status">Online</div></div></div>
     </div>
 
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
-        const tg = window.Telegram.WebApp;
-        if (tg) {
-            tg.ready();
-            tg.expand();
-        }
-
-        // Get unique user ID from Telegram parameters
-        const userId = tg?.initDataUnsafe?.user?.id || "anonymous_user";
+        // Universal Firebase endpoint setup for layout data streaming
+        const FIREBASE_URL = "https://chatblink-b7b5c-default-rtdb.firebaseio.com/global_chat.json";
 
         document.getElementById('ans').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') { sendViaNetwork(); }
+            if (e.key === 'Enter') { sendMessage(); }
         });
 
         function switchView(panelId, tabEl) {
@@ -90,23 +83,43 @@
             feed.scrollTop = feed.scrollHeight;
         }
 
-        function sendViaNetwork() {
+        // Send data safely via network requests without touching Telegram
+        function sendMessage() {
             const input = document.getElementById('ans');
             const val = input.value.trim();
             if (!val) return;
             
-            appendMessage(val, "me");
             input.value = '';
 
-            // Safe database writing over standard network protocols
-            const dbUrl = "https://chatblink-b7b5c-default-rtdb.firebaseio.com/chats/" + userId + ".json";
-            
-            fetch(dbUrl, {
-                method: "PUT",
-                body: JSON.stringify({ message: val, timestamp: Date.now() }),
+            const payload = {
+                text: val,
+                sender: "User_" + Math.floor(Math.random() * 1000),
+                timestamp: Date.now()
+            };
+
+            fetch(FIREBASE_URL, {
+                method: "POST",
+                body: JSON.stringify(payload),
                 headers: { "Content-Type": "application/json" }
-            }).catch(err => console.error("Network write skipped:", err));
+            }).catch(err => console.error("Database sync delay:", err));
         }
+
+        // Listen for incoming messages dynamically inside the layout view panel
+        let lastTimestamp = Date.now();
+        setInterval(() => {
+            fetch(FIREBASE_URL + '?orderBy="timestamp"&startAt=' + (lastTimestamp + 1))
+                .then(res => res.json())
+                .then(data => {
+                    if (data) {
+                        Object.values(data).forEach(msg => {
+                            if (msg.timestamp > lastTimestamp) {
+                                appendMessage(msg.text, "me");
+                                lastTimestamp = msg.timestamp;
+                            }
+                        });
+                    }
+                }).catch(() => {});
+        }, 1500);
     </script>
 </body>
 </html>
