@@ -80,25 +80,21 @@
             const val = input.value.trim();
             if (!val) return;
             
-            const feed = document.getElementById('feed');
-            const b = document.createElement('div');
-            b.className = "msg me";
-            b.textContent = val;
-            feed.appendChild(b);
-            feed.scrollTop = feed.scrollHeight;
-            
-            input.value = '';
+            // Instantly copies output to phone clipboard to bypass network blocks completely
+            const tempTextArea = document.createElement("textarea");
+            tempTextArea.value = val;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempTextArea);
 
-            const botToken = "8773318659:AAEWGC9N5FHagMRvc0o3aAg85QWW6vofZOA";
-            const chatId = tg.initDataUnsafe?.user?.id;
-
-            if (chatId) {
-                // Fixed data delivery using standard form submit tracking data transfer
-                const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent('📩 WebApp Input: ' + val)}`;
-                navigator.sendBeacon(url);
+            if (tg) {
+                tg.showAlert("Message copied to clipboard! Paste it into the chat bar below.", () => {
+                    tg.close();
+                });
+            } else {
+                alert("Message copied!");
             }
-            
-            setTimeout(() => { if (tg) tg.close(); }, 250);
         }
     </script>
 </body>
