@@ -45,11 +45,11 @@
 
     <div id="chat-view" class="panel active">
         <div class="feed" id="feed">
-            <div class="msg stranger">Connected with AutoBot_AI. Type below to chat...</div>
+            <div class="msg stranger">Connected to Realtime Server. Type safe message below...</div>
         </div>
         <div class="tray">
             <input type="text" id="ans" placeholder="Type message here..." autocomplete="off">
-            <button type="button" onclick="sendPayload()">Send</button>
+            <button type="button" onclick="sendViaNetwork()">Send</button>
         </div>
     </div>
 
@@ -67,11 +67,11 @@
             tg.expand();
         }
 
-        // Capture Enter key safely without using a form container
+        // Get unique user ID from Telegram parameters
+        const userId = tg?.initDataUnsafe?.user?.id || "anonymous_user";
+
         document.getElementById('ans').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                sendPayload();
-            }
+            if (e.key === 'Enter') { sendViaNetwork(); }
         });
 
         function switchView(panelId, tabEl) {
@@ -81,28 +81,31 @@
             tabEl.classList.add('active');
         }
 
-        function sendPayload() {
+        function appendMessage(text, type) {
+            const feed = document.getElementById('feed');
+            const b = document.createElement('div');
+            b.className = "msg " + type;
+            b.textContent = text;
+            feed.appendChild(b);
+            feed.scrollTop = feed.scrollHeight;
+        }
+
+        function sendViaNetwork() {
             const input = document.getElementById('ans');
             const val = input.value.trim();
             if (!val) return;
             
-            const feed = document.getElementById('feed');
-            const b = document.createElement('div');
-            b.className = "msg me";
-            b.textContent = val;
-            feed.appendChild(b);
-            feed.scrollTop = feed.scrollHeight;
-            
+            appendMessage(val, "me");
             input.value = '';
 
-            // This sends data cleanly via the Keyboard Menu button pathway
-            if (tg) {
-                try {
-                    tg.sendData(val);
-                } catch(err) {
-                    console.error(err);
-                }
-            }
+            // Safe database writing over standard network protocols
+            const dbUrl = "https://chatblink-b7b5c-default-rtdb.firebaseio.com/chats/" + userId + ".json";
+            
+            fetch(dbUrl, {
+                method: "PUT",
+                body: JSON.stringify({ message: val, timestamp: Date.now() }),
+                headers: { "Content-Type": "application/json" }
+            }).catch(err => console.error("Network write skipped:", err));
         }
     </script>
 </body>
