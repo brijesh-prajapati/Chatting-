@@ -45,7 +45,7 @@
 
     <div id="chat-view" class="panel active">
         <div class="feed" id="feed">
-            <div class="msg stranger">Welcome to ChatBlink clone room. Live layout connection active!</div>
+            <div class="msg stranger">Connected to Realtime Server. Type safe message below...</div>
         </div>
         <div class="tray">
             <input type="text" id="ans" placeholder="Type message here..." autocomplete="off">
@@ -60,8 +60,10 @@
     </div>
 
     <script>
-        // Universal Firebase endpoint setup for layout data streaming
         const FIREBASE_URL = "https://chatblink-b7b5c-default-rtdb.firebaseio.com/global_chat.json";
+        
+        // Generate a constant identifier for this session so the app doesn't double-print your text
+        const mySenderId = "User_" + Math.floor(Math.random() * 8999 + 1000);
 
         document.getElementById('ans').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') { sendMessage(); }
@@ -83,7 +85,6 @@
             feed.scrollTop = feed.scrollHeight;
         }
 
-        // Send data safely via network requests without touching Telegram
         function sendMessage() {
             const input = document.getElementById('ans');
             const val = input.value.trim();
@@ -93,19 +94,21 @@
 
             const payload = {
                 text: val,
-                sender: "User_" + Math.floor(Math.random() * 1000),
+                sender: mySenderId,
                 timestamp: Date.now()
             };
 
+            // Network transmission completely unlinked from Telegram engine hooks
             fetch(FIREBASE_URL, {
                 method: "POST",
                 body: JSON.stringify(payload),
                 headers: { "Content-Type": "application/json" }
-            }).catch(err => console.error("Database sync delay:", err));
+            }).catch(err => console.error(err));
         }
 
-        // Listen for incoming messages dynamically inside the layout view panel
         let lastTimestamp = Date.now();
+        
+        // Polling database connection setup for incoming data structures
         setInterval(() => {
             fetch(FIREBASE_URL + '?orderBy="timestamp"&startAt=' + (lastTimestamp + 1))
                 .then(res => res.json())
@@ -113,13 +116,15 @@
                     if (data) {
                         Object.values(data).forEach(msg => {
                             if (msg.timestamp > lastTimestamp) {
-                                appendMessage(msg.text, "me");
+                                // If sender matched, float right ("me"). If other user, float left ("stranger")
+                                const messageStyle = (msg.sender === mySenderId) ? "me" : "stranger";
+                                appendMessage(msg.text, messageStyle);
                                 lastTimestamp = msg.timestamp;
                             }
                         });
                     }
                 }).catch(() => {});
-        }, 1500);
+        }, 1200);
     </script>
 </body>
 </html>
