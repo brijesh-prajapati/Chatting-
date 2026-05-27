@@ -47,10 +47,10 @@
         <div class="feed" id="feed">
             <div class="msg stranger">Connected with AutoBot_AI. Type below to chat...</div>
         </div>
-        <form class="tray" onsubmit="sendPayload(event)">
-            <input type="text" id="ans" placeholder="Type message here..." autocomplete="off" required>
-            <button type="submit">Send</button>
-        </form>
+        <div class="tray">
+            <input type="text" id="ans" placeholder="Type message here..." autocomplete="off">
+            <button type="button" onclick="sendPayload()">Send</button>
+        </div>
     </div>
 
     <div id="people-view" class="panel">
@@ -74,8 +74,7 @@
             tabEl.classList.add('active');
         }
 
-        function sendPayload(e) {
-            e.preventDefault();
+        function sendPayload() {
             const input = document.getElementById('ans');
             const val = input.value.trim();
             if (!val) return;
@@ -89,12 +88,10 @@
             
             input.value = '';
 
-            // This will execute perfectly because the application is now launched via persistent menu keyboard container layout
             if (tg) {
                 tg.sendData(val);
             }
         }
     </script>
 </body>
-                                          </html>
-            
+</html>
