@@ -67,6 +67,13 @@
             tg.expand();
         }
 
+        // Capture Enter key safely without using a form container
+        document.getElementById('ans').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendPayload();
+            }
+        });
+
         function switchView(panelId, tabEl) {
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -88,8 +95,13 @@
             
             input.value = '';
 
+            // This sends data cleanly via the Keyboard Menu button pathway
             if (tg) {
-                tg.sendData(val);
+                try {
+                    tg.sendData(val);
+                } catch(err) {
+                    console.error(err);
+                }
             }
         }
     </script>
